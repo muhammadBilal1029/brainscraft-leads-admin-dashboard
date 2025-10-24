@@ -19,6 +19,14 @@ export function Sidenav({ brandImg, brandName, routes }) {
   };
 
   return (
+    <>
+    {/* Mobile Backdrop - Close on outside click */}
+      {openSidenav && (
+        <div 
+          className="xl:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setOpenSidenav(dispatch, false)}
+        />
+      )}
     <aside
       className={`${sidenavTypes[sidenavType]} ${
         openSidenav ? "translate-x-0" : "-translate-x-80"
@@ -62,7 +70,12 @@ export function Sidenav({ brandImg, brandName, routes }) {
             )}
             {pages.map(({ icon, name, path }) => (
               <li key={name}>
-                <NavLink to={`/${layout}${path}`}>
+                <NavLink to={`/${layout}${path}`} onClick={() => {
+                      // Close sidebar on mobile when a link is clicked
+                      if (window.innerWidth < 1280) {
+                        setOpenSidenav(dispatch, false);
+                      }
+                    }}>
                   {({ isActive }) => (
                     <Button
                       variant={isActive ? "gradient" : "text"}
@@ -92,12 +105,13 @@ export function Sidenav({ brandImg, brandName, routes }) {
         ))}
       </div>
     </aside>
+    </>
   );
 }
 
 Sidenav.defaultProps = {
   brandImg: "/img/logo-ct.png",
-  brandName: "Material Tailwind React",
+  brandName: "Brainscraft Leads Admin Portal",
 };
 
 Sidenav.propTypes = {

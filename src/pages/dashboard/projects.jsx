@@ -11,7 +11,7 @@ import {
   HomeIcon,
 } from "@heroicons/react/24/solid";
 
-export function Profile() {
+export function Projects() {
   return (
     <>
       <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-[url('/img/background-image.png')] bg-cover	bg-center">
@@ -63,4 +63,4 @@ export function Profile() {
   );
 }
 
-export default Profile;
+export default Projects;
