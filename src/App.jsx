@@ -18,6 +18,8 @@ function App() {
     <Routes>
   <Route path="/dashboard/*" element={<Dashboard />} />
   <Route path="/auth/*" element={<Auth />} />
+   {/* Redirect root path to dashboard */}
+  <Route path="/" element={<Navigate to="/dashboard/home" replace />} />
   <Route path="/404" element={<NotFound />} />
   <Route path="*" element={<Navigate to="/404" replace />} />
 </Routes>
