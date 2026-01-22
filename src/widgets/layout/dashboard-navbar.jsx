@@ -63,9 +63,7 @@ export function DashboardNavbar() {
               {page}
             </Typography>
           </Breadcrumbs>
-          <Typography variant="h6" color="blue-gray">
-            {page}
-          </Typography>
+          
             </div>
             <div className="flex items-center">
            {/* Hamburger/Close button for mobile */}

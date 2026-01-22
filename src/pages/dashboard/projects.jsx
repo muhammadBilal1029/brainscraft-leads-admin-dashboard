@@ -1,65 +1,190 @@
+import { useState, useEffect } from "react";
 import {
   Card,
   CardBody,
-  Avatar,
+  CardHeader,
   Typography,
-  Tabs,
-  TabsHeader,
-  Tab,
+  Avatar,
+  Chip,
+  Button,
+  IconButton,
 } from "@material-tailwind/react";
-import {
-  HomeIcon,
-} from "@heroicons/react/24/solid";
+import { PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
 
 export function Projects() {
-  return (
-    <>
-      <div className="relative mt-8 h-72 w-full overflow-hidden rounded-xl bg-[url('/img/background-image.png')] bg-cover	bg-center">
-        <div className="absolute inset-0 h-full w-full bg-gray-900/75" />
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://192.168.18.146:5000/auth/users/projects-details', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch projects');
+      }
+
+      const data = await response.json();
+      setProjects(Array.isArray(data?.projectsData) ? data.projectsData : []);
+    } catch (err) {
+      console.error('Error fetching projects:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Typography variant="h6">Loading projects...</Typography>
       </div>
-      <Card className="mx-3 -mt-16 mb-6 lg:mx-4 border border-blue-gray-100">
-        <CardBody className="p-4">
-          <div className="mb-10 flex items-center justify-between flex-wrap gap-6">
-            <div className="flex items-center gap-6">
-              <Avatar
-                src="/img/bruce-mars.jpeg"
-                alt="bruce-mars"
-                size="xl"
-                variant="rounded"
-                className="rounded-lg shadow-lg shadow-blue-gray-500/40"
-              />
-              <div>
-                <Typography variant="h5" color="blue-gray" className="mb-1">
-                  Richard Davis
-                </Typography>
-                <Typography
-                  variant="small"
-                  className="font-normal text-blue-gray-600"
-                >
-                  CEO / Co-Founder
-                </Typography>
-              </div>
-            </div>
-            <div className="w-96">
-              <Tabs value="app">
-                <TabsHeader>
-                  <Tab value="app">
-                    <HomeIcon className="-mt-1 mr-2 inline-block h-5 w-5" />
-                    App
-                  </Tab>
-                 
-                </TabsHeader>
-              </Tabs>
-            </div>
-          </div>
-          <div className="gird-cols-1 mb-12 grid gap-12 px-4 lg:grid-cols-2 xl:grid-cols-3">
-           
-          
-          </div>
-        
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center p-4 text-red-500">
+        <Typography variant="h6">Error loading projects</Typography>
+        <Typography className="text-sm">{error}</Typography>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-12 mb-8 flex flex-col gap-12">
+      <Card>
+        <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
+          <Typography variant="h6" color="white">
+            Projects
+          </Typography>
+        </CardHeader>
+        <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
+          <table className="w-full min-w-[640px] table-auto">
+            <thead>
+              <tr>
+                {["Project", "Vendor", "Category", "Status", "Location", "Created", ""].map((el) => (
+                  <th
+                    key={el}
+                    className="border-b border-blue-gray-50 py-3 px-5 text-left"
+                  >
+                    <Typography
+                      variant="small"
+                      className="text-[11px] font-bold uppercase text-blue-gray-400"
+                    >
+                      {el}
+                    </Typography>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {projects.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="py-8 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <Typography variant="h6" color="blue-gray" className="mb-2">
+                        No projects found
+                      </Typography>
+                      <Typography variant="small" color="gray" className="px-4">
+                        There are no projects to display at the moment.
+                      </Typography>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                projects.map((project, key) => {
+                  const className = `py-3 px-5 ${
+                    key === projects.length - 1 ? "" : "border-b border-blue-gray-50"
+                  }`;
+
+                  return (
+                    <tr key={project._id || key}>
+                      <td className={className}>
+                        <div className="flex items-center gap-4">
+                          <div>
+                            <Typography
+                              variant="small"
+                              color="blue-gray"
+                              className="font-semibold"
+                            >
+                              {project.projectName}
+                            </Typography>
+                            <Typography className="text-xs font-normal text-blue-gray-500">
+                              ID: {project.projectId}
+                            </Typography>
+                          </div>
+                        </div>
+                      </td>
+                      <td className={className}>
+                        <Typography className="text-xs font-normal text-blue-gray-600">
+                          {project.vendorId}
+                        </Typography>
+                      </td>
+                      <td className={className}>
+                        <Typography className="text-xs font-semibold text-blue-gray-600">
+                          {project.businessCategory}
+                        </Typography>
+                      </td>
+                      <td className={className}>
+                        <Chip
+                          variant="gradient"
+                          color={
+                            project.status === 'Finished' ? 'green' : 
+                            project.status === 'In Progress' ? 'blue' : 'gray'
+                          }
+                          value={project.status}
+                          className="py-0.5 px-2 text-[11px] font-medium w-fit capitalize"
+                        />
+                      </td>
+                      <td className={className}>
+                        <Typography className="text-xs font-semibold text-blue-gray-600">
+                          {project.city}
+                        </Typography>
+                      </td>
+                      <td className={className}>
+                        <Typography className="text-xs font-semibold text-blue-gray-600">
+                          {new Date(project.createdAt).toLocaleDateString()}
+                        </Typography>
+                      </td>
+                      <td className={className}>
+                        <div className="flex items-center">
+                          <IconButton 
+                            variant="text" 
+                            color="blue-gray" 
+                            size="sm"
+                            className="mr-2"
+                          >
+                            <PencilIcon className="h-4 w-4" />
+                          </IconButton>
+                          <IconButton 
+                            variant="text" 
+                            color="red" 
+                            size="sm"
+                          >
+                            <TrashIcon className="h-4 w-4" />
+                          </IconButton>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </CardBody>
       </Card>
-    </>
+    </div>
   );
 }
 
